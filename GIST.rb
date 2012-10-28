@@ -1,3 +1,4 @@
+#encoding: utf-8
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'lib/integrator'
@@ -5,10 +6,11 @@ require 'narray'
 
 require 'ruby-progressbar'
 
-
 #
 ## Ecriture d'une fonction 1D
 #
+# @param [String] name Nom du fichier dans lequel on écrit les données
+# @param [Hash<FixNum,FixNum>] data_hash Hash sous la forme t=>f(t)
 def write_1D_function(name, data_hash)
     pfo=File.new("#{name}.txt",File::CREAT | File::TRUNC | File::WRONLY)
 
@@ -20,24 +22,32 @@ end
 
 
 
-
+# Modèle EDO de GIST
+#
 class Model_GIST
     include TimeIntegrator
 
+    # Initialisation
+    #
+    # @param [Hash<Symbol, FixNum>] params Paramètres du modèle
+    # @param [Array, NArray] init_values Valeurs initiales
     def initialize(params, init_values)
-        @params=params.freeze
+        @params=params.dup.freeze
         @vars=init_values
-        @vars0=init_values ; @vars0.freeze # Pour conserver les valeurs initiales
+        @vars0=init_values.dup.freeze  # Pour conserver les valeurs initiales
         @numids={}
 
-        puts "Max GF = #{@params[:gamma0]}, min GF = #{-@params[:gamma1]-@params[:delta]}"
     end
 
-    def integrate(tps)
+    # Intégration
+    #
+    # @param [FixNum] tps Temps final de l'intégration
+    def integrate(tps, progress=true)
+
         t=0.0
         dt=0.05
 
-        pb=ProgressBar.create(:title=>"Progression")
+        pb=ProgressBar.create(:title=>"Progression") if progress
 
         hist_P1={}
         hist_P2={}
@@ -60,7 +70,7 @@ class Model_GIST
             end
 
             # Affichage de la barre de progression
-            pb.increment if ctr.modulo(num_iters/100)==0
+            pb.increment if ctr.modulo(num_iters/100)==0 and progress
 
             # Incrément des compteurs
             t+=dt; ctr+=1
@@ -81,23 +91,32 @@ class Model_GIST
     attr_reader :params, :numids
 private
     # Fonction principale d'évolution (y'=func(y))
+    #
+    # @param [NArray] v Vecteur auquel on applique la fonction
     def func(v)
         vect=NArray.float(v.size)
         # Ici v[0]=P1, v[1]=P2, v[2]=M
-        growth_factor=gamma_prolif(v[2])-gamma_necro(v[2])
+        gammaP=gamma_prolif(v[2])
+        growth_factor=gammaP-gamma_necro(v[2])
         vect[0]=(growth_factor-params[:delta]*v[2])*v[0]
         vect[1]=growth_factor*v[1]
-        vect[2]=params[:alpha]*(1.0-gamma_prolif(v[2])/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)-params[:beta]*v[2]*(gamma_prolif(v[2])/params[:gamma0])*(v[0]+v[1])
+        vect[2]=params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)-params[:beta]*v[2]*(gammaP/params[:gamma0])*(v[0]+v[1])
 
         vect
     end
 
     # Facteur de prolifération
+    #
+    # @param [FixNum] m Densité de micro-vaisseaux
+    # @return [FixNum] taux de prolifération
     def gamma_prolif(m)
         params[:gamma0]*0.5*(1.0+Math::tanh(5.0*(m-params[:Mhyp])))
     end
 
     # Facteur de nécrose
+    #
+    # @param [FixNum] m Densité de micro-vaisseaux
+    # @return [FixNum] taux de nécrose
      def gamma_necro(m)
         params[:gamma1]*0.5*(1.0+Math::tanh(5.0*(params[:Mhyp]-m)))
     end
