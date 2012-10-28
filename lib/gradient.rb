@@ -72,7 +72,7 @@ class Sensitivity
   # @param [Observable] obs_patient Observable de référence
   # @param [Observable] obs_calc Observable calculé par le modèle avec les paramètres courants
   # @param [Observable] obs_diff Différence entre l'observable calculé et celui calculé avec la perturbation du paramètre
-  # @return [FixNum] Terme correspondant du gradient
+  # @return [Float] Terme correspondant du gradient
   def calc_gradient obs_patient, obs_calc, obs_diff
     zit=obs_diff-obs_calc
     err=obs_calc-obs_patient
@@ -80,10 +80,10 @@ class Sensitivity
   end
 
   # Mise à jour des paramètres après calcul du gradient
-  # @param [Hash<String,FixNum>] params_orig Paramètres d'origine
+  # @param [Hash<String,Float>] params_orig Paramètres d'origine
   # @param [Array<String>] control_set Set de contrôle (paramètres que l'on fait varier)
-  # @param [Hash<String, FixNum>] gradient Gradient de l'erreur en fonction des paramètres
-  # @return [Hash<String, FixNum] Nouveau jeu de paramètre
+  # @param [Hash<String, Float>] gradient Gradient de l'erreur en fonction des paramètres
+  # @return [Hash<String, Float] Nouveau jeu de paramètre
   def update_params params_orig, control_set, gradient
     pp=params.orig.dup
     control_set.each do |p|

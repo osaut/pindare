@@ -10,7 +10,7 @@ require 'ruby-progressbar'
 ## Ecriture d'une fonction 1D
 #
 # @param [String] name Nom du fichier dans lequel on écrit les données
-# @param [Hash<FixNum,FixNum>] data_hash Hash sous la forme t=>f(t)
+# @param [Hash<Float,Float>] data_hash Hash sous la forme t=>f(t)
 def write_1D_function(name, data_hash)
     pfo=File.new("#{name}.txt",File::CREAT | File::TRUNC | File::WRONLY)
 
@@ -29,7 +29,7 @@ class Model_GIST
 
     # Initialisation
     #
-    # @param [Hash<Symbol, FixNum>] params Paramètres du modèle
+    # @param [Hash<Symbol, Float>] params Paramètres du modèle
     # @param [Array, NArray] init_values Valeurs initiales
     def initialize(params, init_values)
         @params=params.dup.freeze
@@ -41,7 +41,7 @@ class Model_GIST
 
     # Intégration
     #
-    # @param [FixNum] tps Temps final de l'intégration
+    # @param [Float] tps Temps final de l'intégration
     def integrate(tps, progress=true)
 
         t=0.0
@@ -107,16 +107,16 @@ private
 
     # Facteur de prolifération
     #
-    # @param [FixNum] m Densité de micro-vaisseaux
-    # @return [FixNum] taux de prolifération
+    # @param [Float] m Densité de micro-vaisseaux
+    # @return [Float] taux de prolifération
     def gamma_prolif(m)
         params[:gamma0]*0.5*(1.0+Math::tanh(5.0*(m-params[:Mhyp])))
     end
 
     # Facteur de nécrose
     #
-    # @param [FixNum] m Densité de micro-vaisseaux
-    # @return [FixNum] taux de nécrose
+    # @param [Float] m Densité de micro-vaisseaux
+    # @return [Float] taux de nécrose
      def gamma_necro(m)
         params[:gamma1]*0.5*(1.0+Math::tanh(5.0*(params[:Mhyp]-m)))
     end
