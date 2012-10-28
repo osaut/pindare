@@ -6,6 +6,7 @@
 class Observable
   attr_reader :name
   attr_accessor :data
+  include Enumerable
 
   # Constructeur
   #
@@ -14,6 +15,15 @@ class Observable
   def initialize name, time_sequence
     @name=name
     @data=time_sequence.dup
+  end
+
+  # Nombre d'observables
+  def size
+    data.size
+  end
+
+  def each
+    @data.each
   end
 
   # Chargement depuis un répertoire
@@ -38,9 +48,14 @@ class Observable
     Observable.new(new_name,new_data)
   end
 
+  # Norme L2 d'un observable
+  # @return [Float] Norme L2
+  def norm
+    Math::sqrt(data.values.inject(0) { |m,v| m+v**2})
+  end
 
   # Raccourci sur les observations ponctuelles
-  # @param [FixNum] tps Temps de l'observation demandée
+  # @param [Float] tps Temps de l'observation demandée
   # @return Observation
   def [](tps)
     data[tps]
@@ -71,6 +86,8 @@ class Observable
 
   # Distance de deux observables (norme L2)
   def dist_L2 other
+    raise ArgumentError if other.size != size or other.data.keys != data.keys
+
     sum=0.0
     data.each { |key,value|
       sum+=(value-other[key])**2
@@ -80,17 +97,18 @@ class Observable
 
   # Distance relative de deux observables (norme L2)
   def dist_L2_relative other
+    raise ArgumentError if other.size != size or other.data.keys != data.keys
     sum=0.0
-    norm=0.0
     data.each{ |key,value|
       sum+=(value-other[key])**2
-      norm+=value**2
     }
-    Math::sqrt(sum/norm)
+    s_norm = norm
+    s_norm = 1.0 if norm==0.0
+    Math::sqrt(sum)/s_norm
   end
 
   # Multiplication d'un observable
-  # @param [FixNum] other Scalaire par lequel on multiplie les champs observés
+  # @param [Float] other Scalaire par lequel on multiplie les champs observés
   # @return [Observable] Le nouvel observable rescalé.
   def * other
     raise "Multiplication incompatible !" unless other.is_a?(FixNum)
