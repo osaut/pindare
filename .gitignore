@@ -1,2 +1,6 @@
 .DS_Store
 *.txt
+
+/.yardoc/
+/doc/
+/pindare.sublime-workspace
