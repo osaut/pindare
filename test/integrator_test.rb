@@ -25,7 +25,7 @@ class ExpModel
 end
 
 describe TimeIntegrator do
-    before do
+    before :each do
         @v=NArray.float(2).fill!(0.01)
     end
 
