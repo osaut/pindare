@@ -1,12 +1,20 @@
 #encoding: utf-8
+require 'forwardable'
+
 # Class observable
 # Cette classe permet de manipuler tous les observables.
 # La structure de base est un Hash t=>obs
 #
 class Observable
+  include Enumerable
+  extend Forwardable
+
+  # Accesseurs
   attr_reader :name
   attr_accessor :data
-  include Enumerable
+
+  # Délégations
+  def_delegators :@data, :[], :size, :each
 
   # Constructeur
   #
@@ -17,14 +25,6 @@ class Observable
     @data=time_sequence.dup
   end
 
-  # Nombre d'observables
-  def size
-    data.size
-  end
-
-  def each
-    @data.each
-  end
 
   # Chargement depuis un répertoire
   #
@@ -54,12 +54,6 @@ class Observable
     Math::sqrt(data.values.inject(0) { |m,v| m+v**2})
   end
 
-  # Raccourci sur les observations ponctuelles
-  # @param [Float] tps Temps de l'observation demandée
-  # @return Observation
-  def [](tps)
-    data[tps]
-  end
 
   # Différence de deux observables
   def - other
