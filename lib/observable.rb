@@ -105,7 +105,7 @@ class Observable
   # @param [Float] other Scalaire par lequel on multiplie les champs observés
   # @return [Observable] Le nouvel observable rescalé.
   def * other
-    raise "Multiplication incompatible !" unless other.is_a?(FixNum)
+    raise "Multiplication incompatible !" unless other.is_a?(Float)
 
     data.each { |key,value|
       data[key]=other*value
