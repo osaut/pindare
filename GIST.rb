@@ -1,7 +1,7 @@
 #encoding: utf-8
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+($:.unshift File.expand_path(File.join( File.dirname(__FILE__), './lib' ))).uniq!
 
-require 'lib/integrator'
+require 'pindare'
 require 'narray'
 
 require 'ruby-progressbar'
@@ -24,19 +24,11 @@ end
 
 # Modèle EDO de GIST
 #
-class Model_GIST
+class Model_GIST < Model
     include TimeIntegrator
 
-    # Initialisation
-    #
-    # @param [Hash<Symbol, Float>] params Paramètres du modèle
-    # @param [Array, NArray] init_values Valeurs initiales
-    def initialize(params, init_values)
-        @params=params.dup.freeze
-        @vars=init_values
-        @vars0=init_values.dup.freeze  # Pour conserver les valeurs initiales
-        @numids={}
-
+    def post_initialize
+        @name="Modèle pour les GIST"
     end
 
     # Intégration
@@ -56,6 +48,9 @@ class Model_GIST
         ctr=0
         num_iters=tps/dt
         while(t<tps)
+            # Sauvegarde éventuelle des observables
+            save_observables t, dt if instants
+
             # Résolution du pb
             @vars=ts_RK4( @vars, dt)
 
@@ -64,9 +59,9 @@ class Model_GIST
 
             # Sauvegarde de l'historique
             if ctr.modulo(200)==0
-                hist_P1[t]=@vars[0]
-                hist_P2[t]=@vars[1]
-                hist_M[t]=@vars[2]
+                hist_P1[t]=vars[0]
+                hist_P2[t]=vars[1]
+                hist_M[t]=vars[2]
             end
 
             # Affichage de la barre de progression
@@ -76,9 +71,9 @@ class Model_GIST
             t+=dt; ctr+=1
         end
 
-        @numids[:FTV]=@vars[0]+@vars[1]
-        @numids[:P1V]=@vars[0]
-        @numids[:P2V]=@vars[1]
+        @numids[:FTV]=vars[0]+vars[1]
+        @numids[:P1V]=vars[0]
+        @numids[:P2V]=vars[1]
         @numids[:PFS]=t unless @numids.has_key?(:PFS)
 
         write_1D_function("P1", hist_P1)
@@ -88,8 +83,11 @@ class Model_GIST
     end
 
 
+
     attr_reader :params, :numids
 private
+    attr_reader :instants, :saved_obs, :vars
+
     # Fonction principale d'évolution (y'=func(y))
     #
     # @param [NArray] v Vecteur auquel on applique la fonction
@@ -121,33 +119,15 @@ private
         params[:gamma1]*0.5*(1.0+Math::tanh(5.0*(params[:Mhyp]-m)))
     end
 
+
+    def calc_obs symb
+        case symb
+        when :Y
+            vars[0]+vars[1]
+        else
+            fail "Symbole inconnu !"
+        end
+    end
 end
 
 
-
-#
-## Initialisation des paramètres
-#
-pmap={}
-pmap[:gamma0]=0.01*70.5
-pmap[:gamma1]=0.01*0.71
-pmap[:delta]=0.0103471*9.0
-pmap[:beta]=0.0115803/3.0
-pmap[:Mhyp]=0.6
-pmap[:alpha]=0.0005684*0.15*3.05
-pmap[:Pourc]=1-0.99999995
-
-#
-## Données initiales
-#
-v_init=NArray.float(3)
-Surface=460.0
-v_init[0]=Surface*(1.0-pmap[:Pourc]) ; v_init[1]=Surface*pmap[:Pourc] ; v_init[2]=0.3
-
-
-
-#
-## Intégration du modèle de GIST
-model=Model_GIST.new(pmap, v_init)
-model.integrate(800.0)
-puts model.numids
