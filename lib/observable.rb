@@ -14,7 +14,7 @@ class Observable
   attr_accessor :data
 
   # Délégations
-  def_delegators :@data, :[], :size, :each
+  def_delegators :@data, :[], :[]=, :size, :each, :to_s
 
   # Constructeur
   #
@@ -111,5 +111,11 @@ class Observable
       data[key]=other*value
     }
     self
+  end
+
+  # Instants d'observation
+  # @return [Array<Float>] Temps où les observables sont donnés
+  def instants
+    data.keys
   end
 end

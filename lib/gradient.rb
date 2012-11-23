@@ -3,93 +3,112 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 class Sensitivity
 
-  def initialize data
-    @obs=data[:obs]
-    @model_class=data[:model_class]
-    @params0=data[:params0]
-    @init_data=@obs[0]
-    @cset=data[:control_set]
-    @tmax=data[:tmax]
+  def initialize data, logger=nil
+    @obs_ref=data.fetch(:obs)
+    @model_class=data.fetch(:model_class)
+    @params0=data.fetch(:params0)
+    @init_data=data.fetch(:init_cond)
+    @cset=data.fetch(:control_set)
+    @tmax=data.fetch(:tmax)
+    @instants={:Y => @obs_ref.instants}
+    @logger=logger
+    @max_its=data.fetch(:max_its) {10000}
   end
 
-
+# Calcul de la sensitivité approchée
+# @param [Float] tol Tolérance sur l'erreur
+# @return [Array<Float, ParamsSet>] Erreur et jeu de paramètres final
   def gradient(tol)
     params=params0.dup
 
     # Intégration initiale
-    model=model_class.new(params0, init_data)
+    model=model_class.new(params0, init_data, instants)
+    model.integrate(tmax)
     obsc=model.get_observable(:Y)
-    err=obsc.dist_L2_relative(obs)
+    err=obsc.dist_L2_relative(obs_ref)
+
 
     # Boucle principale
-    while(err>tol) do
-
+    ctr=0
+    while(err>tol) and (ctr < @max_its) do
       # Calcul des dérivées partielles
-      dp={}
+      grad={}
       cset.each do |param|
 
-        dp=diff_param(mod_class, params, param, init_data, tmax)
+        dp, obsp=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-4)
 
-        grad[param]=calc_gradient(obs, obsp, dp)
+        grad[param]=calc_gradient(obs_ref, obsp, dp)
       end
 
       # Calcul des nouvelles valeurs des paramètres
-      params=update_params(params,cset,grad)
-
+      update_params(params,cset,grad,err)
 
       # Recalcul de l'erreur
-      model=model_class.new(params,init_data)
-      new_obs=model.get_observable(:Y)
-      err=new_obs.dist_L2_relative(obs)
+      modelc=model_class.new(params,init_data, instants)
+      modelc.integrate(tmax)
+      obsc=modelc.get_observable(:Y)
+      err=obsc.dist_L2_relative(obs_ref)
 
+      logger.record({:it=>ctr, :err=>err, :alpha=>params[:alpha]}) if logger
+
+      ctr+=1
     end
-
+    [err,params]
   end
 
   private
-  attr_reader :model_class, :obs, :cset, :init_data, :params0,:tmax
+  attr_reader :model_class, :obs_ref, :cset, :init_data, :params0,:tmax, :instants, :logger
 
   # Calcul de la DP selon un paramètre
-  def diff_param mod_class, params, pp, step, tmax
+  # @param [Observable] obsc Observable calculé avec les paramètres courants
+  # @param [Class] mod_class Classe du modèle à intégrer
+  # @param [ParamsSet] params Paramètres du modèle
+  # @param [String] pp Paramètre que l'on fait varier
+  # @param [NArray] init_data Condition initiale
+  # @param [Float] tmax Temps final de l'intégration
+  # @param [Float] step Pas
+  # @return [Array<Observable, Observable] Observables correspondants à la différence et à la perturbation
+  def diff_param obsc, mod_class, params, pp, init_data, tmax, step
     l_params=params.dup
+    old_value=l_params[pp]
 
-    model=mod_class.new(lparams, init_data)
-    model.integrate(tmax)
-    obs0=model.get_observable(:Y)
+    if old_value.abs != 0.0
+      l_params[pp]=(1.0+step)*old_value
+    else
+      l_params[pp]=step
+    end
+    diff_pp=l_params[pp]-old_value
+    fail if diff_pp==0.0
 
-    pp.each {|key,value|
-      l_params[key]=value+step
-    }
-
-    model2=mod_class.new(lparams,init_data)
+    model2=mod_class.new(l_params,init_data, instants)
     model2.integrate(tmax)
-    obs1=model.get_observable(:Y)
+    obs1=model2.get_observable(:Y)
 
-    (obs1-obs2)*(1.0/step)
+    [(obs1-obsc)*(1.0/(diff_pp)), obs1]
   end
 
   # Calcul du gradient
   # @param [Observable] obs_patient Observable de référence
   # @param [Observable] obs_calc Observable calculé par le modèle avec les paramètres courants
-  # @param [Observable] obs_diff Différence entre l'observable calculé et celui calculé avec la perturbation du paramètre
+  # @param [Observable] obs_dp Différence entre l'observable calculé et celui calculé avec la perturbation du paramètre
   # @return [Float] Terme correspondant du gradient
-  def calc_gradient obs_patient, obs_calc, obs_diff
-    zit=obs_diff-obs_calc
+  def calc_gradient obs_patient, obs_calc, obs_dp
     err=obs_calc-obs_patient
-    zit.dot_product(err)
+    obs_dp.dot_product(err)
   end
 
   # Mise à jour des paramètres après calcul du gradient
   # @param [Hash<String,Float>] params_orig Paramètres d'origine
   # @param [Array<String>] control_set Set de contrôle (paramètres que l'on fait varier)
   # @param [Hash<String, Float>] gradient Gradient de l'erreur en fonction des paramètres
+  # @param [FixNum] it Numéro de l'itération
   # @return [Hash<String, Float] Nouveau jeu de paramètre
-  def update_params params_orig, control_set, gradient
-    pp=params.orig.dup
+  def update_params params, control_set, gradient, it
+    pas=0.1/(1.0+it.to_f**2)
     control_set.each do |p|
-      pp[p]+=gradient[p]
+      params[p]=params[p]-pas*gradient[p]
     end
-    pp
+    params
   end
 end
 

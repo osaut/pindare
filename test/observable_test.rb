@@ -1,6 +1,7 @@
-require '../lib/observable'
-require 'narray'
+($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
 
+require 'observable'
+require 'narray'
 require 'minitest/autorun'
 
 describe Observable do

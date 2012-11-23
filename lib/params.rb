@@ -27,8 +27,9 @@ class ParamsSet
     JSON::dump(params,File.new(fname, 'w'))
   end
 
+
   # Délégations
-  def_delegators :@params, :[], :size, :each
+  def_delegators :@params, :[], :[]=, :size, :each, :eql?
 
   private
   # Accesseurs
