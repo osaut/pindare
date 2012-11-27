@@ -34,7 +34,7 @@ class Model_GIST < Model
     # Intégration
     #
     # @param [Float] tps Temps final de l'intégration
-    def integrate(tps, progress=true)
+    def integrate(tps, progress=false)
 
         t=0.0
         dt=0.05
@@ -76,10 +76,11 @@ class Model_GIST < Model
         @numids[:P2V]=vars[1]
         @numids[:PFS]=t unless @numids.has_key?(:PFS)
 
-        write_1D_function("P1", hist_P1)
-        write_1D_function("P2",hist_P2)
-        write_1D_function("M",hist_M)
-
+        if(progress)
+            write_1D_function("P1", hist_P1)
+            write_1D_function("P2",hist_P2)
+            write_1D_function("M",hist_M)
+        end
     end
 
 

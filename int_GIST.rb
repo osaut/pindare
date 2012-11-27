@@ -25,5 +25,5 @@ v_init[0]=Surface*(1.0-pmap[:Pourc]) ; v_init[1]=Surface*pmap[:Pourc] ; v_init[2
 #
 ## Intégration du modèle de GIST
 model=Model_GIST.new(pmap, v_init)
-model.integrate(800.0)
+model.integrate(800.0, true)
 puts model.numids

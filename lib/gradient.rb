@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'set'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 class Sensitivity
@@ -11,6 +12,7 @@ class Sensitivity
     @cset=data.fetch(:control_set)
     @tmax=data.fetch(:tmax)
     @instants={:Y => @obs_ref.instants}
+    @params_ranges=data[:params_ranges]
     @logger=logger
     @max_its=data.fetch(:max_its) {10000}
   end
@@ -34,7 +36,7 @@ class Sensitivity
       # Calcul des dérivées partielles
       grad={}
       cset.each do |param|
-
+        puts "\t#{param}"
         dp, obsp=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-4)
 
         grad[param]=calc_gradient(obs_ref, obsp, dp)
@@ -49,7 +51,7 @@ class Sensitivity
       obsc=modelc.get_observable(:Y)
       err=obsc.dist_L2_relative(obs_ref)
 
-      logger.record({:it=>ctr, :err=>err, :alpha=>params[:alpha]}) if logger
+      logger.record({:it=>ctr, :err=>err, :params=>params}) if logger
 
       ctr+=1
     end
@@ -57,7 +59,7 @@ class Sensitivity
   end
 
   private
-  attr_reader :model_class, :obs_ref, :cset, :init_data, :params0,:tmax, :instants, :logger
+  attr_reader :model_class, :obs_ref, :cset, :init_data, :params0,:tmax, :instants, :logger, :params_ranges
 
   # Calcul de la DP selon un paramètre
   # @param [Observable] obsc Observable calculé avec les paramètres courants
@@ -70,7 +72,7 @@ class Sensitivity
   # @return [Array<Observable, Observable] Observables correspondants à la différence et à la perturbation
   def diff_param obsc, mod_class, params, pp, init_data, tmax, step
     l_params=params.dup
-    old_value=l_params[pp]
+    old_value=l_params.fetch(pp)
 
     if old_value.abs != 0.0
       l_params[pp]=(1.0+step)*old_value
@@ -98,7 +100,7 @@ class Sensitivity
   end
 
   # Mise à jour des paramètres après calcul du gradient
-  # @param [Hash<String,Float>] params_orig Paramètres d'origine
+  # @param [Hash<String,Float>] params Paramètres d'origine
   # @param [Array<String>] control_set Set de contrôle (paramètres que l'on fait varier)
   # @param [Hash<String, Float>] gradient Gradient de l'erreur en fonction des paramètres
   # @param [FixNum] it Numéro de l'itération
@@ -106,7 +108,16 @@ class Sensitivity
   def update_params params, control_set, gradient, it
     pas=0.1/(1.0+it.to_f**2)
     control_set.each do |p|
-      params[p]=params[p]-pas*gradient[p]
+      new_value=params[p]-pas*gradient[p]
+
+      if params_ranges[p]
+        if params_ranges[p].include?(new_value)
+          params[p]=params[p]-pas*gradient[p]
+        else
+          params[p]=(new_value>params_ranges[p].max) ? 0.5*(params[p]+params_ranges[p].max) : 0.5*(params[p]+params_ranges[p].min)
+        end
+      end
+
     end
     params
   end

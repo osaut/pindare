@@ -29,7 +29,7 @@ class ParamsSet
 
 
   # Délégations
-  def_delegators :@params, :[], :[]=, :size, :each, :eql?
+  def_delegators :@params, :[], :[]=, :size, :each, :eql?, :fetch
 
   private
   # Accesseurs
