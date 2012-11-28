@@ -24,7 +24,7 @@ class FileLogger
 end
 
 pmap={}
-pmap[:gamma0]=0.01*70.5
+pmap[:gamma0]=1.0001000100009998
 pmap[:gamma1]=0.01*0.71
 pmap[:delta]=0#0.0103471*9.0
 pmap[:beta]=0.0115803/3.0
@@ -40,7 +40,7 @@ obs_growth=Observable.new("NBER", {0=>1.0, 3.8=>18.6851733929})
 
 # Paramètres et set de contrôle
 params=ParamsSet.new (pmap)
-cst=Set.new [:Mhyp, :gamma0, :alpha]
+cst=Set.new [ :gamma1]
 
 # Conditions initiales
 v_init=NArray.float(3)
