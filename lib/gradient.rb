@@ -12,7 +12,7 @@ class Sensitivity
     @cset=data.fetch(:control_set)
     @tmax=data.fetch(:tmax)
     @instants={:Y => @obs_ref.instants}
-    @params_ranges=data[:params_ranges]
+    @params_ranges=data.fetch(:params_ranges) { Hash.new }
     @logger=logger
     @max_its=data.fetch(:max_its) {10000}
   end
@@ -22,34 +22,44 @@ class Sensitivity
 # @return [Array<Float, ParamsSet>] Erreur et jeu de paramètres final
   def gradient(tol)
     params=params0.dup
+    scal=1.0
 
     # Intégration initiale
     model=model_class.new(params0, init_data, instants)
     model.integrate(tmax)
     obsc=model.get_observable(:Y)
     err=obsc.dist_L2_relative(obs_ref)
-
+    err_old=err
 
     # Boucle principale
     ctr=0
     while(err>tol) and (ctr < @max_its) do
+      err_old=err
       # Calcul des dérivées partielles
       grad={}
       cset.each do |param|
-        puts "\t#{param}"
-        dp, obsp=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-4)
+        #puts "\t#{param}"
+        dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-2)
 
-        grad[param]=calc_gradient(obs_ref, obsp, dp)
+        grad[param]=calc_gradient(obs_ref, obsc, dp)+1e-5*new_value
+        #p grad
       end
 
       # Calcul des nouvelles valeurs des paramètres
-      update_params(params,cset,grad,err)
+      params_old=params.dup
+      params=update_params(params,cset,grad,err, scal)
 
       # Recalcul de l'erreur
       modelc=model_class.new(params,init_data, instants)
       modelc.integrate(tmax)
       obsc=modelc.get_observable(:Y)
       err=obsc.dist_L2_relative(obs_ref)
+
+      # Si on fait augmenter l'erreur
+      # if err>=err_old
+      #   scal/=2.0
+      #   params=params_old.dup
+      # end
 
       logger.record({:it=>ctr, :err=>err, :params=>params}) if logger
 
@@ -58,7 +68,6 @@ class Sensitivity
     [err,params]
   end
 
-  private
   attr_reader :model_class, :obs_ref, :cset, :init_data, :params0,:tmax, :instants, :logger, :params_ranges
 
   # Calcul de la DP selon un paramètre
@@ -69,24 +78,19 @@ class Sensitivity
   # @param [NArray] init_data Condition initiale
   # @param [Float] tmax Temps final de l'intégration
   # @param [Float] step Pas
-  # @return [Array<Observable, Observable] Observables correspondants à la différence et à la perturbation
+  # @return [Array<Observable, double] Observable correspondants à la différence et valeur du paramètre
   def diff_param obsc, mod_class, params, pp, init_data, tmax, step
     l_params=params.dup
     old_value=l_params.fetch(pp)
 
-    if old_value.abs != 0.0
-      l_params[pp]=(1.0+step)*old_value
-    else
-      l_params[pp]=step
-    end
+    l_params[pp]= (old_value!=0) ? (1.0+step)*old_value : step
     diff_pp=l_params[pp]-old_value
     fail if diff_pp==0.0
 
     model2=mod_class.new(l_params,init_data, instants)
     model2.integrate(tmax)
     obs1=model2.get_observable(:Y)
-
-    [(obs1-obsc)*(1.0/(diff_pp)), obs1]
+    [(obs1-obsc)*(1.0/(diff_pp)), l_params[pp]]
   end
 
   # Calcul du gradient
@@ -103,18 +107,18 @@ class Sensitivity
   # @param [Hash<String,Float>] params Paramètres d'origine
   # @param [Array<String>] control_set Set de contrôle (paramètres que l'on fait varier)
   # @param [Hash<String, Float>] gradient Gradient de l'erreur en fonction des paramètres
-  # @param [FixNum] it Numéro de l'itération
+  # @param [Float] err Erreur courante (pour adapter le pas)
   # @return [Hash<String, Float] Nouveau jeu de paramètre
-  def update_params params, control_set, gradient, it
-    pas=0.1/(1.0+it.to_f**2)
+  def update_params params, control_set, gradient, err, scal
+    pas=Math::sqrt(err)*0.001/(1.0+Math::sqrt(err))
     control_set.each do |p|
-      new_value=params[p]-pas*gradient[p]
+      new_value=params[p]-scal*pas*gradient[p]
 
       if params_ranges[p]
         if params_ranges[p].include?(new_value)
-          params[p]=params[p]-pas*gradient[p]
+          params[p]=new_value
         else
-          params[p]=(new_value>params_ranges[p].max) ? 0.5*(params[p]+params_ranges[p].max) : 0.5*(params[p]+params_ranges[p].min)
+          params[p]=(new_value>=params_ranges[p].max) ? 0.5*(params[p]+params_ranges[p].max) : 0.5*(params[p]+params_ranges[p].min)
         end
       end
 
