@@ -33,7 +33,7 @@ class Model
       instants.each do |obs, tt|
           @saved_obs[obs] ||= {}
           tt.each do |t|
-              @saved_obs[obs][t] = calc_obs(obs) if (t-tps).abs < tol/2.0
+              @saved_obs[obs][t] = calc_obs(obs) if t>=tps-tol/2.0 and t<tps+tol/2.0
           end
       end
   end
