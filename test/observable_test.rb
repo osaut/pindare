@@ -76,7 +76,7 @@ end
       hh = Hash[ @obs.data.map{ |key,value| [key, Math::sqrt(value)] } ]
       obs2=Observable.new("Linear", hh)
 
-      @obs.dist_L2_relative(obs2).must_equal (3.5730379231124885/@obs.norm)
+      @obs.dist_L2_relative(obs2).must_equal 0.12325884862423606
     end
   end
 
