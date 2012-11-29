@@ -20,7 +20,7 @@ class Observable
   #
   # @param [String] name Nom de l'observable
   # @param [Hash] time_sequence Séquence des observations
-  def initialize name, time_sequence
+  def initialize name=nil, time_sequence
     @name=name
     @data=time_sequence.dup
   end
@@ -94,11 +94,11 @@ class Observable
     raise ArgumentError if other.size != size or other.data.keys != data.keys
     sum=0.0
     data.each{ |key,value|
-      sum+=(value-other[key])**2
+      denom = (other[key]!=0) ? other[key]**2 : 1.0
+      sum+=(value-other[key])**2/denom
     }
-    s_norm = norm
-    s_norm = 1.0 if norm==0.0
-    Math::sqrt(sum)/s_norm
+
+    (1.0/data.size) * Math::sqrt(sum)
   end
 
   # Multiplication d'un observable
