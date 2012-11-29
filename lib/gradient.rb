@@ -39,7 +39,7 @@ class Sensitivity
       grad={}
       cset.each do |param|
         #puts "\t#{param}"
-        dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-2)
+        dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-3)
 
         grad[param]=calc_gradient(obs_ref, obsc, dp)+1e-5*new_value
         #p grad
@@ -56,10 +56,10 @@ class Sensitivity
       err=obsc.dist_L2_relative(obs_ref)
 
       # Si on fait augmenter l'erreur
-      # if err>=err_old
-      #   scal/=2.0
-      #   params=params_old.dup
-      # end
+      if err>err_old
+        scal/=2.0
+        params=params_old.dup
+      end
 
       logger.record({:it=>ctr, :err=>err, :params=>params}) if logger
 

@@ -111,6 +111,54 @@ describe 'when computing the gradient' do
     new_value.must_equal -2.0
 
   end
+
+  it 'should compute the right direction for the gradient (down)' do
+    Local_Model=TestModel.dup
+    class Local_Model
+      def func vv
+        @params[:alpha]
+      end
+    end
+
+    obs=Observable.new({0.0=>0.0, 1.0=>1.0})
+    tmax=1.1
+    params=ParamsSet.new({:alpha=>1.1})
+    init_cond=0.0
+
+    gg=Sensitivity.new({:obs=>obs, :model_class=>Local_Model, :init_cond=>0.0, :params0=>params,
+      :control_set=>[:alpha], :tmax=>1.1, :max_its=>1})
+    obs_calc=Observable.new({0.0=>0.0, 1.0=>1.1})
+
+    obs_res, new_value=gg.diff_param obs_calc, Local_Model, params, :alpha, init_cond, 1.1, 1e-4
+
+    grad=gg.calc_gradient obs, obs_calc, obs_res
+
+    grad.must_be :>, 0.0
+  end
+
+  it 'should compute the right direction for the gradient (up)' do
+    Local_Model=TestModel.dup
+    class Local_Model
+      def func vv
+        @params[:alpha]
+      end
+    end
+
+    obs=Observable.new({0.0=>0.0, 1.0=>1.0})
+    tmax=1.1
+    params=ParamsSet.new({:alpha=>0.8})
+    init_cond=0.0
+
+    gg=Sensitivity.new({:obs=>obs, :model_class=>Local_Model, :init_cond=>0.0, :params0=>params,
+      :control_set=>[:alpha], :tmax=>1.1, :max_its=>1})
+
+    obs_calc=Observable.new({0.0=>0.0, 1.0=>0.8})
+    obs_res, new_value=gg.diff_param obs_calc, Local_Model, params, :alpha, init_cond, 1.1, 1e-4
+
+    grad=gg.calc_gradient obs, obs_calc , obs_res
+
+    grad.must_be :<, 0.0
+  end
 end
 
 describe 'when we fit a linear function (1 parameter)' do
