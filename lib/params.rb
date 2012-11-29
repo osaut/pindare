@@ -6,8 +6,14 @@ class ParamsSet
   extend Forwardable
 
   def initialize hh
-    @params=hh
+    @params=hh.dup
   end
+
+  # On veut une copie du Hash
+  def initialize_copy orig
+    @params=orig.params.dup
+  end
+
 
   def to_s
     str=""
@@ -31,8 +37,7 @@ class ParamsSet
   # Délégations
   def_delegators :@params, :[], :[]=, :size, :each, :eql?, :fetch
 
-  private
   # Accesseurs
-  attr_reader :params
+  attr_accessor :params
 
 end
