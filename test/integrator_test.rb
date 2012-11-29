@@ -1,4 +1,6 @@
-require '../lib/integrator'
+($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
+
+require 'integrator'
 require 'narray'
 
 require 'minitest/autorun'
@@ -15,13 +17,13 @@ class ExpModel
 
 
     def func(v)
-            vect=NArray.float(v.size)
+        vect=NArray.float(v.size)
 
-            vect[0]=@params[:alpha]*v[0]
-            vect[1]=-@params[:alpha]*v[1]
+        vect[0]=@params[:alpha]*v[0]
+        vect[1]=-@params[:alpha]*v[1]
 
-            vect
-        end
+        vect
+    end
 end
 
 describe TimeIntegrator do
