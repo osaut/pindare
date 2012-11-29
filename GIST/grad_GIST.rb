@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'lib/pindare'
+require '../lib/pindare'
 require 'GIST'
 require 'set'
 

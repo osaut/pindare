@@ -1,5 +1,5 @@
 #encoding: utf-8
-($:.unshift File.expand_path(File.join( File.dirname(__FILE__), './lib' ))).uniq!
+($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
 
 require 'pindare'
 require 'narray'
