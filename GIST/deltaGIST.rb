@@ -27,10 +27,9 @@ pmap[:Pourc]=1-0.99999995
 #
 ## Données initiales
 #
-v_init=NArray.float(3)
-Surface=460.0
-v_init[0]=Surface*(1.0-pmap[:Pourc]) ; v_init[1]=Surface*pmap[:Pourc] ; v_init[2]=0.3
-
+surface=460.0
+v_init={:P1=>surface*(1.0-pmap[:Pourc]), :P2=>surface*pmap[:Pourc],
+     :M=>0.3}
 
 #
 ## Lancement du calcul en batch

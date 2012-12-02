@@ -29,6 +29,11 @@ class Model_GIST < Model
 
     def post_initialize
         @name="Modèle pour les GIST"
+        @vars=NArray.float(3)
+        @vars[0]=@vars0[:P1]
+        @vars[1]=@vars0[:P2]
+        @vars[2]=@vars0[:M]
+        @vars0=@vars
     end
 
     # Intégration
@@ -83,7 +88,19 @@ class Model_GIST < Model
         end
     end
 
-
+    class << self
+        # Calcul des données initiales ) partir
+        # @param [Observable] obs_ref Observable
+        # @param [ParamsSet] params Paramètres
+        # @return [NArray] Données initiales
+        def calc_init_data_from_obs obs_ref, params
+            t0=obs_ref.first
+            rr={}
+            rr[:P1]=(1.0-params[:Pourc])*t0
+            rr[:P2]=params[:Pourc]*t0
+            rr
+        end
+    end
 
     attr_reader :params, :numids
 private

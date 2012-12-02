@@ -16,9 +16,9 @@ class AMR_Evaluator
   end
 
   def compute
-    v_init=NArray.float(3)
     surface=460.0
-    v_init[0]=surface*(1.0-@pmap[:Pourc]) ; v_init[1]=surface*@pmap[:Pourc] ; v_init[2]=0.3
+    v_init={:P1=>surface*(1.0-@pmap[:Pourc]), :P2=>surface*@pmap[:Pourc],
+     :M=>0.3}
     model=Model_GIST.new(@pmap, v_init)
     model.integrate(800.0,false)
     num_res=model.numids
