@@ -41,7 +41,7 @@ class Sensitivity
       grad={}
       cset.each do |param|
         #puts "\t#{param}"
-        dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 1e-3)
+        dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 5e-4)
 
         grad[param]=calc_gradient(obs_ref, obsc, dp)+1e-5*new_value
         #p grad
@@ -107,13 +107,13 @@ class Sensitivity
   end
 
   # Mise à jour des paramètres après calcul du gradient
-  # @param [Hash<String,Float>] params Paramètres d'origine
+  # @param [ParamsSet] params Paramètres d'origine
   # @param [Array<String>] control_set Set de contrôle (paramètres que l'on fait varier)
   # @param [Hash<String, Float>] gradient Gradient de l'erreur en fonction des paramètres
   # @param [Float] err Erreur courante (pour adapter le pas)
   # @return [Hash<String, Float] Nouveau jeu de paramètre
   def update_params params, control_set, gradient, err, scal
-    pas=Math::sqrt(err)*0.001/(1.0+Math::sqrt(err))
+    pas=Math::sqrt(err)*0.01/(1.0+Math::sqrt(err))
     control_set.each do |p|
       new_value=params[p]-scal*pas*gradient[p]
 
