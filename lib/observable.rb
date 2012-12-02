@@ -48,6 +48,14 @@ class Observable
     Observable.new(new_name,new_data)
   end
 
+
+  # Première valeur observée
+  #
+  def first
+    key_fist=data.keys.sort.first
+    data[key_fist]
+  end
+
   # Norme L2 d'un observable
   # @return [Float] Norme L2
   def norm
