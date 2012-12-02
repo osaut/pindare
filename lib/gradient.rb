@@ -9,6 +9,7 @@ class Sensitivity
     @model_class=data.fetch(:model_class)
     @params0=data.fetch(:params0)
     @init_data=data.fetch(:init_cond)
+    @recompute_init_data=data.fetch(:recompute_init) { false }
     @cset=data.fetch(:control_set)
     @tmax=data.fetch(:tmax)
     @instants={:Y => @obs_ref.instants}
@@ -25,7 +26,8 @@ class Sensitivity
     scal=1.0
 
     # Intégration initiale
-    model=model_class.new(params0, init_data, instants)
+    v_0=calc_init_data(params)
+    model=model_class.new(params0, v_0, instants)
     model.integrate(tmax)
     obsc=model.get_observable(:Y)
     err=obsc.dist_L2_relative(obs_ref)
@@ -50,7 +52,8 @@ class Sensitivity
       params=update_params(params,cset,grad,err, scal)
 
       # Recalcul de l'erreur
-      modelc=model_class.new(params,init_data, instants)
+      v_0=calc_init_data(params)
+      modelc=model_class.new(params,v_0, instants)
       modelc.integrate(tmax)
       obsc=modelc.get_observable(:Y)
       err=obsc.dist_L2_relative(obs_ref)
@@ -124,6 +127,19 @@ class Sensitivity
 
     end
     params
+  end
+
+  # Calcul des données initiales éventuelllement dépendant des paramètres
+  # @param [ParamsSet] params Jeu de paramètres
+  # @return
+  def calc_init_data params
+    return init_data unless recompute_init?
+
+    @model_class.calc_init_data_from_obs(@obs_ref, params).merge(init_data)
+  end
+
+  def recompute_init?
+    @recompute_init_data
   end
 end
 
