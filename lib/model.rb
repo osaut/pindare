@@ -8,8 +8,8 @@ class Model
   # @param [Array, NArray] init_values Valeurs initiales
   def initialize(params, init_values, observables=nil)
     @params=params.dup.freeze
-    @vars=init_values
-    @vars0=init_values  # Pour conserver les valeurs initiales
+    @vars0=init_values.dup  # Pour conserver les valeurs initiales
+    @vars=@vars0
     @numids={}
     @instants=observables
     @saved_obs={}
