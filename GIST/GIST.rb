@@ -93,6 +93,7 @@ class Model_GIST < Model
             write_1D_function("P1", hist_P1)
             write_1D_function("P2",hist_P2)
             write_1D_function("M",hist_M)
+            write_1D_function("Tumor_Mass", hist_TumorMass)
         end
     end
 
