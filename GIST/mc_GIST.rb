@@ -46,16 +46,22 @@ class Evaluator_GIST
       numids[:FTV]
     end
   end
+
+  class << self
+        def calc_init_data_from_obs obs_ref, params
+          Model_GIST.calc_init_data_from_obs obs_ref, params
+        end
+    end
 end
 
 
-pranges={:delta=>0.0..10.0, :gamma0=>0.1..1.0, :Mhyp=>0.3..0.8, :alpha=>0..5.0, :gamma1=>0.0..1.0, :beta=>0.0..5.0}
-fparams={:Pourc=>5.000000002919336e-08}
-obs_th=Observable.new("NBER", {0=>18.6851733929, 3.0=>10.1022995752, 5.2=>6.6363631443, 7.066666666700001=>6.3900561118,9.566666666700002=>5.7660471141,12.4666666667=>4.4055857513,13.866666666699999=>4.3688765268,16.4=>4.1835522607,18.9666666667=>4.0372564447,21.9=>8.0528322618})
+pranges={:Pourc=>0.0..0.1,:delta=>0.0..10.0, :gamma0=>0.1..1.0, :Mhyp=>0.3..0.8, :alpha=>0..5.0, :gamma1=>0.0..1.0, :beta=>0.0..5.0}
+fparams={}
+obs_th=Observable.new("NBER", {0=>18.6851733929, 3.0=>10.1022995752, 5.2=>6.6363631443, 7.066666666700001=>6.3900561118,9.566666666700002=>5.7660471141,12.4666666667=>4.4055857513,13.866666666699999=>4.3688765268,16.4=>4.1835522607,18.9666666667=>4.0372564447,21.9=>8.0528322618,25.633333333299998=>96.1124512598})
 
 surface=obs_th.first
 Pourc=5.000000002919336e-08
 v_init={:P1=>surface*(1.0-Pourc), :P2=>surface*Pourc,:M=>0.3 }
 
-mc=Monte_Carlo.new({:model_class=>Evaluator_GIST, :params_ranges=>pranges, :fixed_params=>fparams, :data_sim=>{:obs=>{:Y=>obs_th}, :init_values=>v_init, :tmax=>26}}, Screen_Logger.new)
+mc=Monte_Carlo.new({:model_class=>Evaluator_GIST, :recompute_init=>true, :params_ranges=>pranges, :fixed_params=>fparams, :data_sim=>{:obs=>{:Y=>obs_th}, :init_values=>v_init, :tmax=>26}}, Screen_Logger.new)
 mc.run
