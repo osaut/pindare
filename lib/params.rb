@@ -16,11 +16,11 @@ class ParamsSet
 
 
   def to_s
-    str=""
+    str="{"
     params.each do |key,value|
-      str << "#{key} = #{ value } ; "
+      str << "#{key}: #{ value } , "
     end
-    str
+    str << "}"
   end
 
   class << self
