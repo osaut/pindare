@@ -38,13 +38,12 @@ class Sensitivity
     while(err>tol) and (ctr < @max_its) do
       err_old=err
       # Calcul des dérivées partielles
+
       grad={}
       cset.each do |param|
-        #puts "\t#{param}"
         dp, new_value=diff_param(obsc, model_class, params, param, init_data, tmax, 5e-4)
 
         grad[param]=calc_gradient(obs_ref, obsc, dp)+1e-5*new_value
-        #p grad
       end
 
       # Calcul des nouvelles valeurs des paramètres
@@ -64,7 +63,7 @@ class Sensitivity
         params=params_old.dup
       end
 
-      logger.record({:it=>ctr, :err=>err, :params=>params}) if logger
+      logger.record({:it=>ctr, :err=>err, :grad=>norm(grad), :params=>params, :scaling=>scal}) if logger
 
       ctr+=1
     end
@@ -90,7 +89,8 @@ class Sensitivity
     diff_pp=l_params[pp]-old_value
     fail if diff_pp==0.0
 
-    model2=mod_class.new(l_params,init_data, instants)
+    v_0=calc_init_data(params)
+    model2=mod_class.new(l_params,v_0, instants)
     model2.integrate(tmax)
     obs1=model2.get_observable(:Y)
     [(obs1-obsc)*(1.0/(diff_pp)), l_params[pp]]
@@ -129,6 +129,7 @@ class Sensitivity
     params
   end
 
+  private
   # Calcul des données initiales éventuelllement dépendant des paramètres
   # @param [ParamsSet] params Jeu de paramètres
   # @return
@@ -140,6 +141,11 @@ class Sensitivity
 
   def recompute_init?
     @recompute_init_data
+  end
+
+  def norm grad
+    sq_norm=grad.values.inject(0.0) { |n, g| n+g**2 }
+    Math::sqrt(sq_norm)
   end
 end
 
