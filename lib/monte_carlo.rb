@@ -6,6 +6,7 @@ class Monte_Carlo
   def initialize data, logger=nil
     @evaluator_class = data.fetch(:model_class)
     @data_sim=data.fetch(:data_sim)
+    @recompute_init=data.fetch(:recompute_init) { false }
     @params_ranges=data.fetch(:params_ranges)
     @logger=logger
     @fixed_params=data[:fixed_params]
@@ -25,6 +26,8 @@ class Monte_Carlo
       params_hash.merge(@fixed_params)
       params=ParamsSet.new params_hash
 
+
+      data_sim[:init_values]=calc_init_data params
       model=evaluator_class.new(data_sim, params)
       model.run
       history[params]=model.numids
@@ -41,5 +44,15 @@ class Monte_Carlo
     [best_candidate, history]
   end
 
-  attr_reader :params_ranges, :logger, :num_its, :evaluator_class, :fitness, :data_sim
+  private
+  # Calcul des données initiales éventuelllement dépendant des paramètres
+  # @param [ParamsSet] params Jeu de paramètres
+  # @return
+  def calc_init_data params
+    return data_sim.fetch(:init_values) unless @recompute_init
+    data_sim.fetch(:init_values).merge(evaluator_class.calc_init_data_from_obs(data_sim.fetch(:obs)[:Y], params))
+  end
+
+  attr_reader :params_ranges, :logger, :num_its, :evaluator_class, :fitness
+  attr_accessor :data_sim
 end
