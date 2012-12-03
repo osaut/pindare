@@ -42,13 +42,14 @@ class Model_GIST < Model
     def integrate(tps, progress=false)
 
         t=0.0
-        dt=0.05
+        dt=0.0005
 
         pb=ProgressBar.create(:title=>"Progression") if progress
 
         hist_P1={}
         hist_P2={}
         hist_M={}
+        hist_TumorMass={}
 
         ctr=0
         num_iters=tps/dt
@@ -57,7 +58,12 @@ class Model_GIST < Model
             save_observables t, dt if instants
 
             # Résolution du pb
+            @vars[2]*=Math::exp(-0.5*dt*params[:beta]*(gamma_prolif(@vars[2])/params[:gamma0])*(@vars[0]+@vars[1]))
             @vars=ts_RK4( @vars, dt)
+            @vars[2]*=Math::exp(-0.5*dt*params[:beta]*(gamma_prolif(@vars[2])/params[:gamma0])*(@vars[0]+@vars[1]))
+
+
+            fail if @vars[2]<-1e-5
 
             # Calcul des numids
             @numids[:PFS]=t unless (@vars[0]+@vars[1]<=@vars0[0]+@vars0[1]) or @numids.has_key?(:PFS)
@@ -67,6 +73,7 @@ class Model_GIST < Model
                 hist_P1[t]=vars[0]
                 hist_P2[t]=vars[1]
                 hist_M[t]=vars[2]
+                hist_TumorMass[t]=vars[0]+vars[1]
             end
 
             # Affichage de la barre de progression
@@ -79,6 +86,7 @@ class Model_GIST < Model
         @numids[:FTV]=vars[0]+vars[1]
         @numids[:P1V]=vars[0]
         @numids[:P2V]=vars[1]
+        @numids[:M]=vars[2]
         @numids[:PFS]=t unless @numids.has_key?(:PFS)
 
         if(progress)
@@ -116,7 +124,9 @@ private
         growth_factor=gammaP-gamma_necro(v[2])
         vect[0]=(growth_factor-params[:delta]*v[2])*v[0]
         vect[1]=growth_factor*v[1]
-        vect[2]=params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)-params[:beta]*v[2]*(gammaP/params[:gamma0])*(v[0]+v[1])
+        vect[2]=params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)
+        # La décroissance de M est traitée ailleurs
+        #-params[:beta]*[v[2],0.0].max*(gammaP/params[:gamma0])*(v[0]+v[1])
 
         vect
     end
