@@ -2,10 +2,12 @@
 ($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
 
 require 'pindare'
-require 'narray'
-
+require 'matrix'
 require 'ruby-progressbar'
 
+class Vector
+    public :[]=
+end
 #
 ## Ecriture d'une fonction 1D
 #
@@ -29,10 +31,7 @@ class Model_GIST < Model
 
     def post_initialize
         @name="Modèle pour les GIST"
-        @vars=NArray.float(3)
-        @vars[0]=@vars0[:P1]
-        @vars[1]=@vars0[:P2]
-        @vars[2]=@vars0[:M]
+        @vars=Vector[@vars0[:P1], @vars0[:P2], @vars0[:M]]
         @vars0=@vars
     end
 
@@ -119,13 +118,11 @@ private
     #
     # @param [NArray] v Vecteur auquel on applique la fonction
     def func(v)
-        vect=NArray.float(v.size)
         # Ici v[0]=P1, v[1]=P2, v[2]=M
         gammaP=gamma_prolif(v[2])
         growth_factor=gammaP-gamma_necro(v[2])
-        vect[0]=(growth_factor-params[:delta]*v[2])*v[0]
-        vect[1]=params[:rP2P1]*growth_factor*v[1]
-        vect[2]=params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)
+        vect=Vector[ (growth_factor-params[:delta]*v[2])*v[0], params[:rP2P1]*growth_factor*v[1], params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)]
+
         # La décroissance de M est traitée ailleurs
         #-params[:beta]*[v[2],0.0].max*(gammaP/params[:gamma0])*(v[0]+v[1])
 
