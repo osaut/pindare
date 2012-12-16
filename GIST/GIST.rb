@@ -124,7 +124,7 @@ private
         gammaP=gamma_prolif(v[2])
         growth_factor=gammaP-gamma_necro(v[2])
         vect[0]=(growth_factor-params[:delta]*v[2])*v[0]
-        vect[1]=growth_factor*v[1]
+        vect[1]=params[:rP2P1]*growth_factor*v[1]
         vect[2]=params[:alpha]*(1.0-gammaP/params[:gamma0])*(v[0]+v[1])**(2.0/3.0)
         # La décroissance de M est traitée ailleurs
         #-params[:beta]*[v[2],0.0].max*(gammaP/params[:gamma0])*(v[0]+v[1])
