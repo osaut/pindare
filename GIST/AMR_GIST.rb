@@ -1,18 +1,14 @@
 ($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '.' ))).uniq!
-require '/Users/saut/Dropbox/RubyBox/Odysseus/lib/elyse.rb'
+require '/Users/saut/Dropbox/RubyBox/Odysseus/lib/AMR/adaptive_grid.rb'
 
 require 'GIST'
 
 class AMR_Evaluator
   def initialize arr
     @pmap={}
+    @pmap={rP2P1: 4.925802013635103 , Pourc: 0.05535728308588666 , delta: 0.1363978765190499 , gamma0: 0.8558502376169754 , Mhyp: 0.661373525734454 , alpha: 4.92711278180055 , gamma1: 0.7699156164260105 , beta: 4.344959920845218  }
     @pmap[:gamma0]=arr[0] # 0.01*70.5
-    @pmap[:gamma1]=0.01*0.71
-    @pmap[:delta]=0.0103471*9.0
-    @pmap[:beta]=0.0115803/3.0
     @pmap[:Mhyp]=arr[1] # 0.6
-    @pmap[:alpha]=0.0005684*0.15*3.05
-    @pmap[:Pourc]=1-0.99999995
   end
 
   def compute
