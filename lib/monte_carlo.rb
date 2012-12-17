@@ -18,20 +18,9 @@ class Monte_Carlo
     best_fitness=1.0/0.0 ; best_candidate=nil
 
     num_its.times do |ctr|
-      # Construction de la liste des paramètres
-      params_hash={}
-      params_ranges.each do |pp, rr|
-        params_hash[pp]=rr.min+rand*(rr.max-rr.min)
-      end
-      params_hash.merge(@fixed_params)
-      params=ParamsSet.new params_hash
 
-
-      data_sim[:init_values]=calc_init_data params
-      model=evaluator_class.new(data_sim, params)
-      model.run
-      history[params]=model.numids
-      fitness=model.fitness
+      core_history, fitness=launch_core_sims
+      history.merge(core_history)
 
       if fitness < best_fitness
         best_fitness = fitness
@@ -51,6 +40,30 @@ class Monte_Carlo
   def calc_init_data params
     return data_sim.fetch(:init_values) unless @recompute_init
     data_sim.fetch(:init_values).merge(evaluator_class.calc_init_data_from_obs(data_sim.fetch(:obs)[:Y], params))
+  end
+
+  # Tirage d'un jeu de paramètres aléatoires dans l'espace des paramètres
+  # @return [ParamsSet] Jeu de paramètre aléatoire
+  def random_params
+    # Construction de la liste des paramètres
+      params_hash={}
+      params_ranges.each do |pp, rr|
+        params_hash[pp]=rr.min+rand*(rr.max-rr.min)
+      end
+      params_hash.merge(@fixed_params)
+      ParamsSet.new params_hash
+  end
+
+  # Lancement d'un ensemble de simulation (sur un core)
+  def launch_core_sims
+    hist={}
+    params=random_params
+    data_sim[:init_values]=calc_init_data params
+    model=evaluator_class.new(data_sim, params)
+    model.run
+    hist[params]=model.numids
+
+    [hist,model.fitness]
   end
 
   attr_reader :params_ranges, :logger, :num_its, :evaluator_class, :fitness
