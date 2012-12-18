@@ -22,3 +22,9 @@ desc "Launch with pry"
 task :console do
   system "pry", "-r", "./lib/pindare.rb"
 end
+
+# Gem
+desc "Build gem"
+task :build_gem do
+  system "gem build pindare.gemspec"
+end

@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   # Infos de base / version
   s.name = 'pindare'
-  s.version = '0.0.0'
+  s.version = '0.0.1'
   s.date = "2012-10-28"
   s.summary = "Manipulation des modèles EDO"
   s.license = 'MIT'
@@ -24,8 +24,9 @@ Gem::Specification.new do |s|
   s.test_files = Dir.glob('test/*_test.rb')
 
   # Dépendances
-  gem 'narray'
+  gem 'celluloid'
+  gem 'ruby-progressbar'
 
   # Chemins
-  s.require_path='.'
+  #s.require_path='.'
 end
