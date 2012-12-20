@@ -77,10 +77,10 @@ class Observable
   def dot_product other
     sum=0.0
     data.each {|key,value|
-      if value.is_a?(NArray)
-        sum+=(value*other[key]).sum
-      else
+      if value.is_a?(Float)
         sum+=value*other[key]
+      else
+        sum+=(value*other[key]).sum
       end
     }
     sum
