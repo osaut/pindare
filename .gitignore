@@ -1,8 +1,18 @@
-.DS_Store
-*.txt
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
 
-/.yardoc/
-/doc/
-/pindare.sublime-workspace
-/pindare.sublime-project
-/pindare-0.0.0.gem
+# YARD artifacts
+.yardoc
+_yardoc
+doc/
