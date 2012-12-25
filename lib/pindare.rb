@@ -1,3 +1,8 @@
+require 'matrix'
+class Vector
+  public :[]=
+end
+
 require 'gradient'
 require 'integrator'
 require 'params'

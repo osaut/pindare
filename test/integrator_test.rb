@@ -1,8 +1,10 @@
 ($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
 
 require 'integrator'
-require 'narray'
-
+require 'matrix'
+class Vector
+  public :[]=
+end
 require 'minitest/autorun'
 
 
@@ -17,10 +19,8 @@ class ExpModel
 
 
     def func(v)
-        vect=NArray.float(v.size)
 
-        vect[0]=@params[:alpha]*v[0]
-        vect[1]=-@params[:alpha]*v[1]
+        vect=Vector[@params[:alpha]*v[0], -@params[:alpha]*v[1]]
 
         vect
     end
@@ -28,7 +28,7 @@ end
 
 describe TimeIntegrator do
     before :each do
-        @v=NArray.float(2).fill!(0.01)
+        @v=Vector[0.01,0.01]
     end
 
     describe "when solving explicitely" do

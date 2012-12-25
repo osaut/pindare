@@ -4,7 +4,6 @@ require 'gradient'
 require 'model'
 require 'integrator'
 require 'params'
-require 'narray'
 
 require 'minitest/autorun'
 require 'minitest/pride'
