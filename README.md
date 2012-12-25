@@ -1,6 +1,7 @@
 Pindare ruby gem
 =======
-(c) Olivier Saut, 2012, <osaut@airpost.net>
+[![Build Status](https://secure.travis-ci.org/osaut/pindare.png?branch=master)](http://travis-ci.org/osaut/pindare)
+(c) 2012 Olivier Saut <osaut@airpost.net>
 
 ## 1. What is Pindare?
 Pindare is a gem for evaluating and calibrating simple mathematical models based on Ordinary Differential Equations. Its main purpose is to speed-up the development of new ODE models for tumor growth that could be used with clinical data.

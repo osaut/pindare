@@ -1,4 +1,4 @@
 source :rubygems
 
-gem "celluloid"
-gem "ruby-progressbar"
+gem 'rake'
+gem 'celluloid'
