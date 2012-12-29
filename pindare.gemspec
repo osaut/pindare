@@ -3,35 +3,37 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'pindare/version'
 
-Gem::Specification.new do |s|
+Gem::Specification.new do |gem|
   # Infos de base / version
-  s.name = 'pindare'
-  s.version = Pindare::VERSION
-  s.date = "2012-10-28"
-  s.summary = "Manipulation des modèles EDO"
-  s.license = 'MIT'
+  gem.name = 'pindare'
+  gem.version = Pindare::VERSION
+  gem.date = "2012-10-28"
+  gem.summary = "Manipulation des modèles EDO"
+  gem.license = 'MIT'
 
-  s.description = <<-EOF
+  gem.description = <<-EOF
     Regroupement des méthodes et algorithmes pour tester et calibrer des modèles EDO.
 
-    - Simulation avec différentes intégrations temporelles.
-    - Construction de base de données.
+    - Simulation avec différentes intégrations temporellegem.
+    - Construction de base de donnéegem.
     - Calibration par sensitivité approchée.
   EOF
 
   # Auteur / Contact
-  s.author = 'Olivier Saut'
-  s.email = 'osaut@airpost.net'
-  s.homepage = 'http://kesaco.eu'
+  gem.author = 'Olivier Saut'
+  gem.email = 'osaut@airpost.net'
+  gem.homepage = 'http://kesaco.eu'
 
   # Fichiers et extensions
-  s.files = `git ls-files`.split($/)
-  s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
+  gem.files = `git ls-files`.split($/)
+  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
 
   # Dépendances
-  gem 'celluloid'
+  gem.add_runtime_dependency 'celluloid'
+  gem.add_development_dependency 'rake'
+  gem.add_development_dependency 'yard'
 
   # Chemins
-  s.require_paths = ["lib"]
+  gem.require_paths = ["lib"]
 end
