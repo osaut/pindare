@@ -15,4 +15,23 @@ It is also my first ruby gem, so for me it is a way for becoming a better rubyis
 Pindare uses the BSD license. See LICENSE for details.
 
 ## 3. Installing Pindare
-    gem install pindare
+Add this line to your application's Gemfile:
+
+    gem 'pindare'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install pindare
+
+
+## 4. Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
