@@ -1,11 +1,14 @@
+require 'pindare/version'
 require 'matrix'
 class Vector
   public :[]=
 end
 
-require 'gradient'
-require 'integrator'
-require 'params'
-require 'observable'
-require 'model'
-require 'monte_carlo'
+module Pindare
+  require 'pindare/gradient'
+  require 'pindare/integrator'
+  require 'pindare/params'
+  require 'pindare/observable'
+  require 'pindare/model'
+  require 'pindare/monte_carlo'
+end

@@ -1,7 +1,12 @@
+# -*- encoding: utf-8 -*-
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'pindare/version'
+
 Gem::Specification.new do |s|
   # Infos de base / version
   s.name = 'pindare'
-  s.version = '0.0.1'
+  s.version = Pindare::VERSION
   s.date = "2012-10-28"
   s.summary = "Manipulation des modèles EDO"
   s.license = 'MIT'
@@ -20,13 +25,13 @@ Gem::Specification.new do |s|
   s.homepage = 'http://kesaco.eu'
 
   # Fichiers et extensions
-  s.files = Dir['lib/**/*.rb']
-  s.test_files = Dir.glob('test/*_test.rb')
+  s.files = `git ls-files`.split($/)
+  s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
 
   # Dépendances
   gem 'celluloid'
-  gem 'ruby-progressbar'
 
   # Chemins
-  #s.require_path='.'
+  s.require_paths = ["lib"]
 end

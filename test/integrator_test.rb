@@ -1,10 +1,6 @@
 ($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
 
-require 'integrator'
-require 'matrix'
-class Vector
-  public :[]=
-end
+require 'pindare'
 require 'minitest/autorun'
 
 

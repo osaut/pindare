@@ -1,5 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
-gem 'rake'
-gem 'celluloid'
-gem 'yard'
+# Specify your gem's dependencies in pindare.gemspec
+gemspec

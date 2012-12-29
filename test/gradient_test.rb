@@ -1,9 +1,5 @@
 ($:.unshift File.expand_path(File.join( File.dirname(__FILE__), '../lib' ))).uniq!
-require 'observable'
-require 'gradient'
-require 'model'
-require 'integrator'
-require 'params'
+require 'pindare'
 
 require 'minitest/autorun'
 require 'minitest/pride'
