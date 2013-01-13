@@ -1,5 +1,6 @@
 require 'pindare/version'
 require 'matrix'
+
 class Vector
   public :[]=
 end
