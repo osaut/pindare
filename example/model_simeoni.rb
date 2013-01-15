@@ -16,7 +16,7 @@ class Model_Simeoni < Model
   # Intégration
   #
   # @param [Float] tps Temps final de l'intégration
-  def integrate(tps)
+  def integrate(tps, progress=false)
 
     t=0.0
     dt=0.0005
@@ -29,7 +29,7 @@ class Model_Simeoni < Model
       # Sauvegarde éventuelle des observables
       save_observables t, dt if instants
 
-      @vars=ts_RK4( @vars, dt)
+      @vars=ts_RK4(t, @vars, dt)
 
 
 
@@ -57,7 +57,7 @@ class Model_Simeoni < Model
 
   # Fonction principale d'évolution (y'=func(y))
   #
-  def func(v)
+  def func(t, v)
     lambda0=params[:lambda0]
     psi=params[:psi]
     lambda0*v/(1.0+(lambda0/params[:lambda1]*v)**psi)**(1.0/psi)
@@ -68,5 +68,5 @@ end
 pmap={psi: 1.0, lambda0: 1.0, lambda1: 1.0}
 w_init=1.0
 model=Model_Simeoni.new(pmap, w_init)
-model.integrate(20.0,false)
+model.integrate(20.0)
 #puts model.numids

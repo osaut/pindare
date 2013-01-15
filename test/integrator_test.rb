@@ -14,11 +14,8 @@ class ExpModel
     end
 
 
-    def func(v)
-
-        vect=Vector[@params[:alpha]*v[0], -@params[:alpha]*v[1]]
-
-        vect
+    def func(t,v)
+        Vector[@params[:alpha]*v[0], -@params[:alpha]*v[1]]
     end
 end
 
@@ -38,7 +35,7 @@ describe TimeIntegrator do
 
                 while(t<=tps)
                     # Résolution du pb
-                    @vars=ts_euler_explicit( @vars, dt)
+                    @vars=ts_euler_explicit(t, @vars, dt)
                     t+=dt
                 end
                 [@vars[0], @vars[1]]
@@ -60,7 +57,7 @@ describe TimeIntegrator do
 
                 while(t<tps)
                     # Résolution du pb
-                    @vars=ts_RK2( @vars, dt)
+                    @vars=ts_RK2(t, @vars, dt)
                     t+=dt
                 end
                 [@vars[0], @vars[1]]
@@ -83,7 +80,7 @@ describe TimeIntegrator do
 
                 while(t<tps)
                     # Résolution du pb
-                    @vars=ts_RK4( @vars, dt)
+                    @vars=ts_RK4(t, @vars, dt)
                     t+=dt
                 end
                 [@vars[0], @vars[1]]

@@ -20,7 +20,7 @@ describe Sensitivity do
         @v=@vars0
         while t<tps
           save_observables t, dt if instants
-          @v=ts_RK4( @v, dt)
+          @v=ts_RK4(t, @v, dt)
 
           t=t+dt
         end
@@ -35,7 +35,7 @@ describe Sensitivity do
         end
       end
 
-      def func v
+      def func t,v
         v
       end
     end
@@ -65,7 +65,7 @@ describe 'when computing the gradient' do
   it 'should give the right DP (increasing version)' do
     Local_Model=TestModel.dup
     class Local_Model
-      def func vv
+      def func t,vv
         @params[:alpha]
       end
     end
@@ -87,7 +87,7 @@ describe 'when computing the gradient' do
   it 'should give the right DP (decreasing version)' do
     Local_Model=TestModel.dup
     class Local_Model
-      def func vv
+      def func t,vv
         @params[:alpha]
       end
     end
@@ -110,7 +110,7 @@ describe 'when computing the gradient' do
   it 'should compute the right direction for the gradient (down)' do
     Local_Model=TestModel.dup
     class Local_Model
-      def func vv
+      def func t,vv
         @params[:alpha]
       end
     end
@@ -134,7 +134,7 @@ describe 'when computing the gradient' do
   it 'should compute the right direction for the gradient (up)' do
     Local_Model=TestModel.dup
     class Local_Model
-      def func vv
+      def func t,vv
         @params[:alpha]
       end
     end
@@ -163,7 +163,7 @@ describe 'when we fit a linear function (1 parameter)' do
 
     Linear_Model=TestModel.dup
     class Linear_Model
-      def func vv
+      def func t,vv
         @params[:alpha]
       end
     end
@@ -228,7 +228,7 @@ describe 'when we fit a linear function (1 parameter)' do
 
       Exp_Model=TestModel.dup
       class Exp_Model
-        def func vv
+        def func t,vv
           @params[:alpha]*vv
         end
       end
